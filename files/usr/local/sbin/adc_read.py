@@ -82,7 +82,7 @@ def init_gpios():
   GPIO.add_event_detect(GPIO_BTN, GPIO.FALLING,
                         callback=start_stop, bouncetime=1000)
   led = GPIO.PWM(GPIO_LED, LED_FREQ)
-  led.start(0)
+  led.start(100)
 
 # --- read SPI-bus   ---------------------------------------------------------
                         
@@ -105,7 +105,7 @@ def start_stop(btn):
   if not lock.acquire(btn == 0):
     return
   if active or btn == 0:
-    led.ChangeDutyCycle(0)      # stop blinking LED
+    led.ChangeDutyCycle(100)    # stop blinking LED
     event.set()                 # signal stop event
     oled.cls()                  # clear display
   else:
