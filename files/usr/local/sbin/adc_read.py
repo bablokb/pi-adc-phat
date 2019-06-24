@@ -23,9 +23,9 @@ import RPi.GPIO as GPIO
 
 # --- configuration   --------------------------------------------------------
 
-INTERVAL  = 1      # sample interval in seconds
+INTERVAL  = 0.3    # sleep-time (results in sample interval of about 0.5s)
 FONT_NAME = '/usr/share/fonts/truetype/freefont/FreeMono.ttf'
-FONT_SIZE = 30
+FONT_SIZE = 25
 ADC="MCP3002"      # ADC-type, must be one of the types defined below
 GPIO_BTN  = 20     # GPIO connected to button (BCM-numbering)
 GPIO_LED  = 12     # GPIO connected to LED    (BCM-numbering)
@@ -172,7 +172,7 @@ def collect_data():
 def save_data(f,now,u0,u1):
   """ process data """
 
-  line = "{0},{1:2.1f},{2:2.1f}\n".format(now.strftime("%s"),u0,u1)
+  line = "{0},{1:2.1f},{2:2.1f}\n".format(now.strftime("%s.%f"),u0,u1)
   try:
     f.write(line)
     f.flush()
@@ -188,9 +188,9 @@ def display_data(u0,u1):
 
   oled.canvas.rectangle((0, 0, oled.width, oled.height), outline=0, fill=0)
   y_off = 0
-  oled.canvas.text((0,y_off),"0: {0:2.1f}V".format(u0),font=font,fill=1)
+  oled.canvas.text((0,y_off),"0: {0:3.2f}V".format(u0),font=font,fill=1)
   y_off += 0.9*FONT_SIZE
-  oled.canvas.text((0,y_off),"1: {0:2.1f}V".format(u1),font=font,fill=1)
+  oled.canvas.text((0,y_off),"1: {0:3.2f}V".format(u1),font=font,fill=1)
   oled.display()
 
 # --- signal handler   -------------------------------------------------------
