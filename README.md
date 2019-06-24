@@ -21,7 +21,7 @@ The circuit uses the following components:
   - two 10k ohm resistors (for the voltage-dividers)
   - two 15k ohm resistors (for the voltage-dividers)
   - one 100 ohm resistor
-
+  - 2x2 female connectors (to attach the measurement probes)
 
 Schematic
 ---------
@@ -43,9 +43,10 @@ the Pi-Zero:
 
 ![](images/pi-adc-phat.jpg "ADC-pHat")
 
-Wireing is best seen using the Fritzing view of the bonnet:
+Wiring is best seen using the Fritzing view of the bonnet:
 
 ![](images/fritzing-adc.png "Layout using Fritzing")
+
 
 
 Software
@@ -61,9 +62,17 @@ dependencies, run
 The install command will also configure SPI and I2C, if not already done.
 Note that you must restart your Pi if SPI or I2C is newly activated.
 
+If you use a different ADC or if you use other GPIOs for buttons and LED,
+you have to change the program `/usr/local/sbin/adc_read.py`. The same
+holds true if you use different resistors for the voltage-divider.
+
 
 Usage
 -----
+
+Connect jumper-wires to the connectors on the lower right of the
+bonnet (the two connectors nearer to the middle are GND, the other two
+are channel-0 and channel-1 of the ADC).
 
 The installation-script configures a systemd-service for the reader
 program. As soon as the LED is on, you can start and stop the measurement
