@@ -69,6 +69,8 @@ The installation-script configures a systemd-service for the reader
 program. As soon as the LED is on, you can start and stop the measurement
 using the push-button.
 
+To shutdown the system, press the button at least for two seconds.
+
 To disable this system-service at startup execute the command
 
     sudo systemctl disable pi-adc-phat.service
