@@ -16,11 +16,11 @@ The circuit uses the following components:
   - MCP3002 two-channel ADC (10 bit) connected to the SPI-bus
   - DIL-8 socket for the MCP3002
   - one green LED
-  - one button
+  - one button (start/stop of measurement)
   - I2C mini-OLED display based on the SSD1306-chip
   - two 10k ohm resistors (for the voltage-dividers)
   - two 15k ohm resistors (for the voltage-dividers)
-  - one 180 ohm resistor
+  - one 100 ohm resistor
 
 
 Schematic
@@ -41,7 +41,11 @@ On a breadboard, this looks somewhat messy:
 We use the **Perma Proto Bonnet Mini Kit** to create a pluggable pHat for
 the Pi-Zero:
 
-  **to come**
+![](images/pi-adc-phat.jpg "ADC-pHat")
+
+Wireing is best seen using the Fritzing view of the bonnet:
+
+![](images/fritzing-adc.png "Layout using Fritzing")
 
 
 Software
@@ -55,22 +59,36 @@ dependencies, run
     sudo tools/install
 
 The install command will also configure SPI and I2C, if not already done.
+Note that you must restart your Pi if SPI or I2C is newly activated.
 
 
 Usage
 -----
 
-Just start the reader-program and push the button to start and stop the
-measurement:
+The installation-script configures a systemd-service for the reader
+program. As soon as the LED is on, you can start and stop the measurement
+using the push-button.
 
-    adc_read.py
+To disable this system-service at startup execute the command
 
-If you additionally pass a filename (or "-" for standard-output) the
+    sudo systemctl disable pi-adc-phat.service
+
+Now you can start the reader-program manually (e.g. from a ssh-shell):
+
+    /usr/local/sbin/adc_read.py [filename|-]
+
+If you pass a filename (or "-" for standard-output) the
 measurements will also be appended to the argument file (or dumped to
 the console in the latter case).
 
-The installation-script also configures a system-service for the reader
-program. You can start this system-service automatically at startup by
-executing
 
-    sudo systemctl enable adc-phat.service
+LED-States
+----------
+
+The LED uses the following states:
+
+| State | Description           | Action on button pressed |
+|-------|-----------------------|--------------------------|
+| On    | ready                 | starts measurement       |
+| blink | measurement is active | stops  measurement       |
+
