@@ -1,0 +1,22 @@
+# --------------------------------------------------------------------------
+# Systemd service Definition for pi-adc-phat.service.
+#
+# The service starts the script /usr/local/sbin/adc_read.py
+#
+# Author: Bernhard Bablok
+# License: GPL3
+#
+# Website: https://github.com/bablokb/pi-adc-phat
+#
+# --------------------------------------------------------------------------
+
+[Unit]
+Description=Two Channel ADC pHat
+After=multi-user.target
+ 
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/adc_read.py
+
+[Install]
+WantedBy=multi-user.target
