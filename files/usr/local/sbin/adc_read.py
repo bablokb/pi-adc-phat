@@ -15,7 +15,7 @@
 #
 # ----------------------------------------------------------------------------
 
-import smbus, spidev, sys, threading, signal
+import smbus, spidev, sys, threading, signal, datetime
 
 from lib_oled96 import ssd1306
 from PIL        import ImageFont
@@ -27,10 +27,10 @@ INTERVAL  = 1      # sample interval in seconds
 FONT_NAME = '/usr/share/fonts/truetype/freefont/FreeMono.ttf'
 FONT_SIZE = 30
 ADC="MCP3002"      # ADC-type, must be one of the types defined below
-GPIO_BTN  = 16     # GPIO connected to button (BCM-numbering)
+GPIO_BTN  = 20     # GPIO connected to button (BCM-numbering)
 GPIO_LED  = 12     # GPIO connected to LED    (BCM-numbering)
 LED_FREQ  = 1      # blink frequency of LED
-LED_DC    = 50     # duty-cycle of LED
+LED_DC    = 50     # duty-cycle of LED (brightness)
 U_FAC = 5.0/3.0    # this depends on the measurement-circuit (voltage-devider)
 
 # --- constants (don't change)   ---------------------------------------------
@@ -46,6 +46,8 @@ ADC_MASK   = 2**(ADC_VALUES[ADC]['RESOLUTION']-8) - 1
 
 U_REF = 3.3
 U_RES = U_REF/ADC_RES
+
+LED_FREQ_ON = 100   # blink-frequency for always on
 
 # --- initialize SPI-bus   ---------------------------------------------------
 
@@ -81,8 +83,8 @@ def init_gpios():
   GPIO.setup(GPIO_BTN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
   GPIO.add_event_detect(GPIO_BTN, GPIO.FALLING,
                         callback=start_stop, bouncetime=1000)
-  led = GPIO.PWM(GPIO_LED, LED_FREQ)
-  led.start(100)
+  led = GPIO.PWM(GPIO_LED, LED_FREQ_ON)
+  led.start(LED_DC)
 
 # --- read SPI-bus   ---------------------------------------------------------
                         
@@ -105,12 +107,12 @@ def start_stop(btn):
   if not lock.acquire(btn == 0):
     return
   if active or btn == 0:
-    led.ChangeDutyCycle(100)    # stop blinking LED
-    event.set()                 # signal stop event
-    oled.cls()                  # clear display
+    led.ChangeFrequency(LED_FREQ_ON)  # stop blinking LED
+    event.set()                       # signal stop event
+    oled.cls()                        # clear display
   else:
-    led.ChangeDutyCycle(LED_DC) # start blinking LED
-    event.clear()               # reset stop event
+    led.ChangeFrequency(LED_FREQ)     # change to blink
+    event.clear()                     # reset stop event
     threading.Thread(target=collect_data).start()
 
   active = not active
@@ -121,22 +123,46 @@ def start_stop(btn):
 def collect_data():
   """ collect data """
 
-  global spi, event
+  global spi, event, out_file
+
+  f = None
+  if out_file:
+    if out_file == "-":
+      f = sys.stdout
+    else:
+      try:
+        f = open(out_file,"a")
+      except:
+        out_file = None
 
   while True:
+    if out_file and f:
+      now = datetime.datetime.now()
     u0 = read_spi(0)*U_RES*U_FAC
     u1 = read_spi(1)*U_RES*U_FAC
-    process_data(u0,u1)
+    if out_file and f:
+      save_data(f,now,u0,u1)
     display_data(u0,u1)
     if event.wait(INTERVAL):
       break
 
+  if f and out_file != "-":
+    try:
+      f.close()
+    except:
+      pass
+
 # --- process data   ---------------------------------------------------------
 
-def process_data(u0,u1):
+def save_data(f,now,u0,u1):
   """ process data """
 
-  print("0: {0:2.1f}V\n1: {1:2.1f}V\n".format(u0,u1))
+  line = "{0},{1:2.1f},{2:2.1f}\n".format(now.strftime("%s"),u0,u1)
+  try:
+    f.write(line)
+    f.flush()
+  except:
+    f = none
 
 # --- display data   ---------------------------------------------------------
 
@@ -173,6 +199,11 @@ if __name__ == '__main__':
   active = False
   event  = threading.Event()
   lock   = threading.Lock()
+
+  # check argument
+  out_file = None
+  if len(sys.argv) > 1:
+    out_file = sys.argv[1]
 
   # initialize hardware
   init_spi()
