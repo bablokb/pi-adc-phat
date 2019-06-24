@@ -15,7 +15,7 @@
 #
 # ----------------------------------------------------------------------------
 
-import smbus, spidev, sys, threading, signal, datetime
+import smbus, spidev, sys, threading, signal, datetime, time, os
 
 from lib_oled96 import ssd1306
 from PIL        import ImageFont
@@ -106,6 +106,21 @@ def start_stop(btn):
 
   if not lock.acquire(btn == 0):
     return
+
+  # check for long press
+  if btn != 0:
+    start_time = time.time()
+    while GPIO.input(btn) == 0:       # Wait for the button up
+      pass
+    buttonTime = time.time() - start_time
+    if buttonTime > 2:
+      if active:
+        event.set()
+        oled.cls()
+      lock.release()
+      os.system("halt -p")
+      return
+
   if active or btn == 0:
     led.ChangeFrequency(LED_FREQ_ON)  # stop blinking LED
     event.set()                       # signal stop event
