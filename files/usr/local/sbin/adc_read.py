@@ -23,17 +23,20 @@ import RPi.GPIO as GPIO
 
 # --- configuration   --------------------------------------------------------
 
-INTERVAL  = 0.3    # sleep-time (results in sample interval of about 0.5s)
-FONT_NAME = '/usr/share/fonts/truetype/freefont/FreeMono.ttf'
-FONT_SIZE = 25
-ADC="MCP3002"      # ADC-type, must be one of the types defined below
-GPIO_BTN  = 20     # GPIO connected to button (BCM-numbering)
-GPIO_LED  = 12     # GPIO connected to LED    (BCM-numbering)
-LED_FREQ  = 1      # blink frequency of LED
-LED_DC    = 50     # duty-cycle of LED (brightness)
-U_FAC = 5.0/3.0    # this depends on the measurement-circuit (voltage-devider)
+DELAY    = 0.3     # additional delay inbetween samples (must be positive)
+                   # Pi-Zero does about 4.5 samples/sec maximum
+ADC = "MCP3002"    # ADC-type, must be one of the types defined below
+GPIO_BTN = 20      # GPIO connected to button (BCM-numbering)
+GPIO_LED = 12      # GPIO connected to LED    (BCM-numbering)
+LED_FREQ = 1       # blink frequency of LED
+LED_DC   = 50      # duty-cycle of LED (brightness)
+U_REF    = 3.3     # reference-voltage
+U_FAC    = 5.0/3.0 # this depends on the measurement-circuit (voltage-divider)
 
 # --- constants (don't change)   ---------------------------------------------
+
+FONT_NAME = '/usr/share/fonts/truetype/freefont/FreeMono.ttf'
+FONT_SIZE = 25
 
 ADC_VALUES = {
   'MCP3002': { 'CMD_BYTES': [[0,104,0],[0,120,0]], 'RESOLUTION': 10},
@@ -44,7 +47,6 @@ ADC_BYTES  = ADC_VALUES[ADC]['CMD_BYTES']
 ADC_RES    = 2**ADC_VALUES[ADC]['RESOLUTION']
 ADC_MASK   = 2**(ADC_VALUES[ADC]['RESOLUTION']-8) - 1
 
-U_REF = 3.3
 U_RES = U_REF/ADC_RES
 
 LED_FREQ_ON = 100   # blink-frequency for always on
@@ -70,6 +72,7 @@ def init_oled():
   i2cbus = smbus.SMBus(1)
   oled   = ssd1306(i2cbus)
   font   = ImageFont.truetype(FONT_NAME,FONT_SIZE)
+  oled.cls()
 
 # --- initialize GPIOs   -----------------------------------------------------
 
@@ -158,7 +161,7 @@ def collect_data():
     if out_file and f:
       save_data(f,now,u0,u1)
     display_data(u0,u1)
-    if event.wait(INTERVAL):
+    if event.wait(DELAY):
       break
 
   if f and out_file != "-":
