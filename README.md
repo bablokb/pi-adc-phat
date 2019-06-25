@@ -62,9 +62,28 @@ dependencies, run
 The install command will also configure SPI and I2C, if not already done.
 Note that you must restart your Pi if SPI or I2C is newly activated.
 
+
+Configuration
+-------------
+
 If you use a different ADC or if you use other GPIOs for buttons and LED,
 you have to change the program `/usr/local/sbin/adc_read.py`. The same
 holds true if you use different resistors for the voltage-divider.
+
+At the beginning of the program you will find a section `configuration`.
+Unless you know what you are doing, only change constants in this section:
+
+    # --- configuration   --------------------------------------------------------
+
+    DELAY    = 0.3     # additional delay inbetween samples (must be positive)
+                       # Pi-Zero does about 4.5 samples/sec maximum
+    ADC = "MCP3002"    # ADC-type, must be one of the types defined below
+    GPIO_BTN = 20      # GPIO connected to button (BCM-numbering)
+    GPIO_LED = 12      # GPIO connected to LED    (BCM-numbering)
+    LED_FREQ = 1       # blink frequency of LED
+    LED_DC   = 50      # duty-cycle of LED (brightness)
+    U_REF    = 3.3     # reference-voltage
+    U_FAC    = 5.0/3.0 # this depends on the measurement-circuit (voltage-divider)
 
 
 Usage
