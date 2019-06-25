@@ -1,4 +1,4 @@
-A two-channel DIY pHat for the Pi-Zero
+A two-channel ADC pHat for the Pi-Zero
 ======================================
 
 This hardware/software project creates a two-channel ADC pHat for the
