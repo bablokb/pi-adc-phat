@@ -28,7 +28,7 @@ Schematic
 
 The schematic:
 
-  **to come**
+![](images/schematic.png "Schematic")
 
 Note the two voltage-dividers used for the two analog channels of the
 MCP3002. Since our reference voltage is 3.3V, the voltage-dividers extend
