@@ -20,7 +20,7 @@ The circuit uses the following components:
   - I2C mini-OLED display based on the SSD1306-chip
   - two 10k ohm resistors (for the voltage-dividers)
   - two 15k ohm resistors (for the voltage-dividers)
-  - one 100 ohm resistor
+  - one 100 ohm resistor (for the LED)
   - 2x2 female connectors (to attach the measurement probes)
 
 Schematic
